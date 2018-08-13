@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from operator import itemgetter
 import json
 import requests
-import time
+
 ''' The following class extracts the top 5 projects along with top commitees
      Beautiful soup has been used to parse the html content '''
 class TopProjects:
@@ -42,7 +42,7 @@ class TopProjects:
                thisProject['Link']=allProjects[i].div.h3.find("a")['href']
                thisProject['Link']="https://api.github.com/repos/"+self.org+"/"+thisProject['ProjectName']+"/contributors"       #link to access the contritors page       
                print(thisProject['Link'])
-               time.sleep(3)
+               
                projRequest=requests.get(thisProject['Link'],verify=True)
               
                dictContrib=projRequest.json()
