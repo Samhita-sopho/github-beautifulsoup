@@ -1,12 +1,14 @@
 from bs4 import BeautifulSoup
 from operator import itemgetter
-import re
+import json
 import requests
+import time
 ''' The following class extracts the top 5 projects along with top commitees
      Beautiful soup has been used to parse the html content '''
 class TopProjects:
      def __init__(self,url):
-          self.url=url
+          self.org=org
+          self.url="https://github.com/"+url+"?utf8=%E2%9C%93&q=&type=fork&language="
           self.r=requests.get(self.url,verify=True)
           print(self.r)
           #print(self.r.content)
@@ -34,15 +36,22 @@ class TopProjects:
                
                thisProject={}
                thisProject['Contributors']=[]
-               thisProject['ProjectName']=allProjects[i].div.h3.a.text
+               thisProject['ProjectName']=str(allProjects[i].div.h3.a.text).strip()
                atags=allProjects[i].find("div",attrs={"class":'f6 text-gray mt-2'}).find_all("a")
                thisProject['Forks']=self.convertToNum(atags[1].text)
                thisProject['Link']=allProjects[i].div.h3.find("a")['href']
-               thisProject['Link']="http://www.github.com"+thisProject['Link']+"/graphs/contributors"       #link to access the contritors page       
-               '''
-               projRequest=requests.get(thisProject['Link'])
-               print(projRequest)
-               c=projRequest.content
+               thisProject['Link']="https://api.github.com/repos/"+self.org+"/"+thisProject['ProjectName']+"/contributors"       #link to access the contritors page       
+               print(thisProject['Link'])
+               time.sleep(3)
+               projRequest=requests.get(thisProject['Link'],verify=True)
+              
+               dictContrib=projRequest.json()
+               print(dictContrib)
+               break;
+               tempDict=sorted(self.projects,key=itemgetter('contributions'),reverse=True)
+               thisProject['Contributors']=tempDict[0:3]
+               print(thisProject)
+               '''c=projRequest.content
                soup=BeautifulSoup(c,"html.parser")
                print(soup)'''
                self.projects.append(thisProject)
@@ -60,9 +69,9 @@ class TopProjects:
                print('*****************')
           
           
-url = raw_input("Enter an organization's name to extract from: ")
-url="https://github.com/"+url+"?utf8=%E2%9C%93&q=&type=fork&language="
-o1=TopProjects(url)
+org = raw_input("Enter an organization's name to extract from: ")
+
+o1=TopProjects(org)
 o1.getTopProjects()
 o1.printTopProjects()              
 """
