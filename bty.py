@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from operator import itemgetter
 import json
 import requests
-
+import time
 ''' The following class extracts the top 5 projects along with top commitees
      Beautiful soup has been used to parse the html content '''
 class TopProjects:
@@ -43,17 +43,15 @@ class TopProjects:
                thisProject['Link']="https://api.github.com/repos/"+self.org+"/"+thisProject['ProjectName']+"/contributors"       #link to access the contritors page       
                print(thisProject['Link'])
                
-               projRequest=requests.get(thisProject['Link'],verify=True)
-              
+               projRequest=requests.get(thisProject['Link'],verify=True)              
                dictContrib=projRequest.json()
-               print(dictContrib)
-               break;
-               tempDict=sorted(self.projects,key=itemgetter('contributions'),reverse=True)
+               for j in range(0,len(dictContrib)):
+                    tempD={}
+                    tempD['cname']=dictContrib[j]["login"]
+                    tempD['ccount']=dictContrib[j]["contributions"]
+                    thisProject['Contributors'].append(tempD)
+               tempDict=sorted(thisProject['Contributors'],key=itemgetter('ccount'),reverse=True)
                thisProject['Contributors']=tempDict[0:3]
-               print(thisProject)
-               '''c=projRequest.content
-               soup=BeautifulSoup(c,"html.parser")
-               print(soup)'''
                self.projects.append(thisProject)
           l=sorted(self.projects,key=itemgetter('Forks'),reverse=True)#sorts the projects according to forks
           self.projects=l[0:5]#obtains the top most projects by forks
@@ -66,9 +64,10 @@ class TopProjects:
                print(self.projects[i]['ProjectName'])
                print(self.projects[i]['Forks'])
                print(self.projects[i]['Link'])
-               print('*****************')
-          
-          
+               print("Top committes")
+               for j in range(0,len(self.projects[i]['Contributors'])):
+                    print("NAME:"+self.projects[i]['Contributors'][j]["cname"]+"-->"+"COMMITS:"+str(self.projects[i]['Contributors'][j]["ccount"]))
+
 org = raw_input("Enter an organization's name to extract from: ")
 
 o1=TopProjects(org)
