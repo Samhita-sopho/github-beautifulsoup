@@ -1,2 +1,2 @@
 # github-beautifulsoup
-scraps the projects to see return top prjects along woth top contributors 
+a python script to search github to search for projects and return top ones along with top contributors.
